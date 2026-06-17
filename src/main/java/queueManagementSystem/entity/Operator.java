@@ -2,6 +2,7 @@ package queueManagementSystem.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import queueManagementSystem.enums.Role;
 
 @Entity
 @Table(name = "operators")
@@ -22,6 +23,9 @@ public class Operator {
     private String username;
 
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @ManyToOne
     @JoinColumn(name = "service_type_id")

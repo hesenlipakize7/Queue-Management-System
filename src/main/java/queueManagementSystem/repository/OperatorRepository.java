@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface OperatorRepository extends JpaRepository<Operator,Long> {
 
-    Optional<Operator> findByUsernameAndPassword(String username, String password);
+    Optional<Operator> findByUsername(String username);
 }

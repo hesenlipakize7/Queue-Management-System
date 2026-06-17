@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -30,5 +31,26 @@ public class JwtServiceImpl implements JwtService {
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
                 .compact();
+    }
+    @Override
+    public String extractUsername(String token) {
+
+        SecretKey key =
+                Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+    @Override
+    public boolean validateToken(String token,
+                                 UserDetails userDetails) {
+
+        String username = extractUsername(token);
+
+        return username.equals(userDetails.getUsername());
     }
 }

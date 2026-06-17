@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: pakize
+
+      changes:
+
+        - createTable:
+            tableName: operators
+
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+
+              - column:
+                  name: username
+                  type: VARCHAR(50)
+
+              - column:
+                  name: password
+                  type: VARCHAR(255)
+
+              - column:
+                  name: desk_number
+                  type: INT
+
+              - column:
+                  name: role
+                  type: VARCHAR(30)
+
+              - column:
+                  name: service_type_id
+                  type: BIGINT

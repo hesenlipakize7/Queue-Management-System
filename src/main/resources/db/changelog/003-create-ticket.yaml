@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: pakize
+
+      changes:
+
+        - createTable:
+            tableName: tickets
+
+            columns:
+
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: ticket_number
+                  type: VARCHAR(30)
+
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP
+
+              - column:
+                  name: called_at
+                  type: TIMESTAMP
+
+              - column:
+                  name: finished_at
+                  type: TIMESTAMP
+
+              - column:
+                  name: operator_id
+                  type: BIGINT
+
+              - column:
+                  name: service_type_id
+                  type: BIGINT

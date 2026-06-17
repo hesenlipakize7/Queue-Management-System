@@ -23,5 +23,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     long countByOperatorIdAndStatus(Long operatorId, TicketStatus status);
 
+    List<Ticket> findByStatus(TicketStatus status);
+
+    List<Ticket> findAllByOperatorIdAndStatus(Long operatorId, TicketStatus status);
+
+    Long countByServiceType_IdAndStatus(Long serviceType_id, TicketStatus status);
 }
 

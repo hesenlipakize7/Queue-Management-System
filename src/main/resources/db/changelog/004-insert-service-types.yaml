@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4
+      author: pakize
+
+      changes:
+
+        - insert:
+            tableName: service_types
+            columns:
+              - column:
+                  name: name
+                  value: Kredit
+              - column:
+                  name: prefix
+                  value: K
+
+        - insert:
+            tableName: service_types
+            columns:
+              - column:
+                  name: name
+                  value: Ödəniş
+              - column:
+                  name: prefix
+                  value: O
+
+        - insert:
+            tableName: service_types
+            columns:
+              - column:
+                  name: name
+                  value: Məlumat
+              - column:
+                  name: prefix
+                  value: M

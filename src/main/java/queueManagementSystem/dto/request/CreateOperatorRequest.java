@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import queueManagementSystem.enums.Role;
 
 @Getter
 @Setter
@@ -20,4 +21,6 @@ public class CreateOperatorRequest {
     private String password;
 
     private Long serviceTypeId;
+
+    private Role role;
 }

@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import queueManagementSystem.dto.request.CreateOperatorRequest;
 import queueManagementSystem.dto.request.LoginRequest;
+import queueManagementSystem.dto.request.TransferTicketRequest;
 import queueManagementSystem.dto.resppnse.CreateOperatorResponse;
 import queueManagementSystem.dto.resppnse.LoginResponse;
 import queueManagementSystem.dto.resppnse.OperatorResponse;
@@ -58,5 +59,21 @@ public class OperatorController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
         return ResponseEntity.ok(operatorService.login(request));
+    }
+
+    @PostMapping("/{id}/recall")
+    public ResponseEntity<OperatorResponse> recallTicket(@PathVariable Long id) {
+        return ResponseEntity.ok(operatorService.recallTicket(id));
+    }
+
+    @PostMapping("/{id}/skip")
+    public ResponseEntity<OperatorResponse> skipTicket(@PathVariable Long id) {
+        return ResponseEntity.ok(operatorService.skipTicket(id));
+    }
+
+    @PostMapping("/{id}/transfer")
+    public ResponseEntity<OperatorResponse> transferTicket(@PathVariable Long id, @RequestBody TransferTicketRequest request) {
+
+        return ResponseEntity.ok(operatorService.transferTicket(id, request));
     }
 }

@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/001-create-service-type.yaml
+
+  - include:
+      file: db/changelog/002-create-operator.yaml
+
+  - include:
+      file: db/changelog/003-create-ticket.yaml
+
+  - include:
+      file: db/changelog/004-insert-service-types.yaml

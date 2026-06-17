@@ -9,5 +9,7 @@ public enum TicketStatus {
 
     FINISHED,
 
-    CANCELLED
+    CANCELLED,
+
+    SKIPPED
 }

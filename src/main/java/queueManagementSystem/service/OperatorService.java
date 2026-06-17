@@ -2,6 +2,7 @@ package queueManagementSystem.service;
 
 import queueManagementSystem.dto.request.CreateOperatorRequest;
 import queueManagementSystem.dto.request.LoginRequest;
+import queueManagementSystem.dto.request.TransferTicketRequest;
 import queueManagementSystem.dto.resppnse.CreateOperatorResponse;
 import queueManagementSystem.dto.resppnse.LoginResponse;
 import queueManagementSystem.dto.resppnse.OperatorResponse;
@@ -25,5 +26,11 @@ public interface OperatorService {
 
     void delete(Long id);
 
+    OperatorResponse recallTicket(Long operatorId);
+
+    OperatorResponse skipTicket(Long operatorId);
+
     LoginResponse login(LoginRequest request);
+
+    OperatorResponse transferTicket(Long operatorId, TransferTicketRequest request);
 }

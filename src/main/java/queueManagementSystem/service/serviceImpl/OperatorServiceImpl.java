@@ -1,9 +1,13 @@
 package queueManagementSystem.service.serviceImpl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import queueManagementSystem.dto.request.CreateOperatorRequest;
 import queueManagementSystem.dto.request.LoginRequest;
+import queueManagementSystem.dto.request.TransferTicketRequest;
 import queueManagementSystem.dto.resppnse.CreateOperatorResponse;
 import queueManagementSystem.dto.resppnse.LoginResponse;
 import queueManagementSystem.dto.resppnse.OperatorResponse;
@@ -33,17 +37,45 @@ public class OperatorServiceImpl implements OperatorService {
     private final OperatorRepository operatorRepository;
     private final ServiceTypeRepository serviceTypeRepository;
     private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
 
     @Override
     public OperatorResponse nextTicket(Long operatorId) {
 
         Operator operator = operatorRepository.findById(operatorId)
-                .orElseThrow(() -> new OperatorNotFoundException("Operator not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Operator not found"));
 
-        Ticket ticket = ticketRepository.findFirstByServiceTypeAndStatusOrderByCreatedAtAsc(
-                        operator.getServiceType(), TicketStatus.WAITING)
-                .orElseThrow(() -> new NoWaitingTicketException("No waiting ticket"));
+        List<Ticket> activeTickets =
+                ticketRepository.findAllByOperatorIdAndStatus(
+                        operatorId,
+                        TicketStatus.SERVING
+                );
+
+        System.out.println("Active ticket count = " + activeTickets.size());
+
+        for (Ticket t : activeTickets) {
+            System.out.println(
+                    t.getId() + " | " +
+                    t.getTicketNumber() + " | " +
+                    t.getStatus() + " | " +
+                    t.getOperator().getId()
+            );
+        }
+
+        if (!activeTickets.isEmpty()) {
+            throw new RuntimeException(
+                    "Operator already has an active ticket");
+        }
+
+        Ticket ticket = ticketRepository
+                        .findFirstByServiceTypeAndStatusOrderByCreatedAtAsc(
+                                operator.getServiceType(),
+                                TicketStatus.WAITING)
+                        .orElseThrow(() ->
+                                new RuntimeException("No waiting ticket"));
 
         ticket.setStatus(TicketStatus.SERVING);
         ticket.setCalledAt(LocalDateTime.now());
@@ -98,8 +130,9 @@ public class OperatorServiceImpl implements OperatorService {
                 .name(request.getName())
                 .deskNumber(request.getDeskNumber())
                 .username(request.getUsername())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .serviceType(serviceType)
+                .role(request.getRole())
                 .build();
 
         operatorRepository.save(operator);
@@ -147,11 +180,21 @@ public class OperatorServiceImpl implements OperatorService {
 
     @Override
     public LoginResponse login(LoginRequest request) {
+        System.out.println(request.getUsername());
+        System.out.println(request.getPassword());
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
+        System.out.println("Authenticated!");
 
         Operator operator = operatorRepository
-                .findByUsernameAndPassword(request.getUsername(), request.getPassword())
+                .findByUsername(request.getUsername())
                 .orElseThrow(() ->
-                        new RuntimeException("Username or password is incorrect"));
+                        new RuntimeException("Operator not found"));
 
         String token = jwtService.generateToken(operator.getUsername());
 
@@ -161,6 +204,83 @@ public class OperatorServiceImpl implements OperatorService {
                 .deskNumber(operator.getDeskNumber())
                 .serviceType(operator.getServiceType().getName())
                 .token(token)
+                .build();
+    }
+
+    @Override
+    public OperatorResponse recallTicket(Long operatorId) {
+
+        List<Ticket> tickets =
+                ticketRepository.findAllByOperatorIdAndStatus(
+                        operatorId,
+                        TicketStatus.SERVING
+                );
+
+        if (tickets.isEmpty()) {
+            throw new RuntimeException("No active ticket");
+        }
+
+        Ticket ticket = tickets.get(0);
+
+        return OperatorResponse.builder()
+                .ticketNumber(ticket.getTicketNumber())
+                .deskNumber(ticket.getOperator().getDeskNumber())
+                .build();
+    }
+
+    @Override
+    public OperatorResponse skipTicket(Long operatorId) {
+
+        List<Ticket> tickets =
+                ticketRepository.findAllByOperatorIdAndStatus(
+                        operatorId,
+                        TicketStatus.SERVING
+                );
+
+        if (tickets.isEmpty()) {
+            throw new RuntimeException("No active ticket");
+        }
+
+        Ticket ticket = tickets.get(0);
+
+        ticket.setStatus(TicketStatus.SKIPPED);
+        ticket.setFinishedAt(LocalDateTime.now());
+
+        ticketRepository.save(ticket);
+
+        return OperatorResponse.builder()
+                .ticketNumber(ticket.getTicketNumber())
+                .deskNumber(ticket.getOperator().getDeskNumber())
+                .build();
+    }
+
+    @Override
+    public OperatorResponse transferTicket(Long operatorId, TransferTicketRequest request) {
+
+        Ticket ticket = ticketRepository
+                .findAllByOperatorIdAndStatus(operatorId, TicketStatus.SERVING)
+                .stream()
+                .findFirst()
+                .orElseThrow(() ->
+                        new RuntimeException("No active ticket"));
+
+        ServiceType serviceType = serviceTypeRepository.findById(request.getServiceTypeId())
+                        .orElseThrow(() ->
+                                new RuntimeException("Service type not found"));
+
+        ticket.setServiceType(serviceType);
+
+        ticket.setStatus(TicketStatus.WAITING);
+
+        ticket.setOperator(null);
+
+        ticket.setCalledAt(null);
+
+        ticketRepository.save(ticket);
+
+        return OperatorResponse.builder()
+                .ticketNumber(ticket.getTicketNumber())
+                .deskNumber(null)
                 .build();
     }
 

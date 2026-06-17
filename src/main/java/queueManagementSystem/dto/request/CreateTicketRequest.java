@@ -8,5 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateTicketRequest {
+
     private Long serviceTypeId;
 }
